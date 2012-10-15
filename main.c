@@ -33,7 +33,7 @@
 
 #define ISspace(x) isspace((int)(x))
 
-#define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"
+#define SERVER_STRING "Server: bonsai/0.0.1a\r\n"
 
 void accept_request(int);
 void bad_request(int);
@@ -56,10 +56,11 @@ void unimplemented(int);
 void accept_request(int client) {
     char buf[1024];
     int numchars;
+    unsigned int i;
+    unsigned int j;
     char method[255];
     char url[255];
     char path[512];
-    size_t i, j;
     struct stat st;
     int cgi = 0;      /* becomes true if server decides this is a CGI
 					* program */
@@ -67,7 +68,8 @@ void accept_request(int client) {
 
     numchars = get_line(client, buf, sizeof(buf));
     
-    i = 0; j = 0;
+    i = 0;
+    j = 0;
     while (!ISspace(buf[j]) && (i < sizeof(method) - 1)) {
         method[i] = buf[j];
         i++; j++;
