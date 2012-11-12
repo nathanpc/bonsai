@@ -14,7 +14,7 @@
       (lambda ()
         (kill-thread t)
         (tcp-close listener))
-    (display (format "Server started listening at ~n" port))))
+    (fprintf (current-output-port) "Server started listening at ~a" port)))
 
 (define stop-server
   (lambda ()
@@ -43,3 +43,6 @@
   (display "Content-Type: text/html\r\n" out)
   (display "\r\n" out)
   (display "<h1>It works!</h1>" out))
+
+
+(bonsai "start")
