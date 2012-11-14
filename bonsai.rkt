@@ -1,5 +1,7 @@
 #lang racket
 
+(require "./handler.rkt")
+
 ; Setup the server custodian.
 (define server-custodian (make-custodian))
 
@@ -17,8 +19,7 @@
     (lambda ()
       (kill-thread t)
       (tcp-close listener))
-
-    (display (format "Server started listening at ~a" port)))
+    (display (format "Server started listening at ~a~n" port))))
 
 ; Stop the server.
 (define stop-server
@@ -34,23 +35,9 @@
          (else
           (stop-server)))))
 
-; Setup the connection handler.
-(define (accept-and-handle listener)
-  (define-values (in out) (tcp-accept listener))
-  (handle in out)
-  (close-input-port in)
-  (close-output-port out))
-
-; The handler.
-(define (handle in out)
-  ; Discart the request header (up to a blank line)
-  (regexp-match #rx"(\r\n|^)\r\n" in)
-  ; Send reply
-  (display "HTTP/1.0 200 OK\r\n" out)
-  (display "Server: bamboo v0.0.0a\r\n" out)
-  (display "Content-Type: text/html\r\n" out)
-  (display "\r\n" out)
-  (display "<h1>It works!</h1>" out))
+(define (do-not-return)
+  (semaphore-wait (make-semaphore 0)))
 
 ; Start the server.
 (bonsai "start")
+(do-not-return)
