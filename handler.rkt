@@ -2,6 +2,24 @@
   (provide accept-and-handle)
   (provide handle)
   
+  (require "./while.rkt")
+  
+  (define (get-header in)
+    (define tmp-list (list))
+
+    (define current-header (read-line in))
+    (while (not (equal? current-header "\r"))
+      (set! tmp-list (append tmp-list (string-split current-header "\r")))
+      (set! current-header (read-line in)))
+    tmp-list)
+
+
+  (define (request-type req-head)
+    (list-ref (string-split req-head) 0))
+  
+  (define (requested-location req-head)
+    (list-ref (string-split req-head) 1))
+  
   ; Setup the connection handler.
   (define (accept-and-handle listener)
     (define-values (in out) (tcp-accept listener))
@@ -11,12 +29,11 @@
   
   ; The handler.
   (define (handle in out)
-    (display in)
-    ;(define request-headers (port->string in))
-    ;(sync )
-    ;(print (handle-evt? (eof-evt in)))
-    ;(print (evt? (eof-evt in)))
-    ;(display (format "~a~n" ))
+    (define headers (get-header in))
+
+    (display (format "~s~n" headers))
+    (display (format "~s~n" (string-split (list-ref headers 0))))
+    
     ; Discart the request header (up to a blank line)
     ;(regexp-match #rx"(\r\n|^)\r\n" in)
 
@@ -26,4 +43,4 @@
     (display "Content-Type: text/html\r\n" out)
     (display "\r\n" out)
     ;(file->string file #:mode 'text)
-    (display "<h1>It works!</h1>" out)))
+    (display "<h1>It works!</h1>\r\n\r\n" out)))
