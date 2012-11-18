@@ -21,7 +21,7 @@
     (define loc-string-last (string-ref loc-string (- (string-length loc-string) 1)))
     
     (cond
-      [(equal? loc-string-last #\/)
+      [(directory-exists? (format "./htdocs~a" loc-string))
         (set! loc-string (format "/~a/~a" (string-join loc-list "/") "index.html"))])
     
     (format "./htdocs~a" loc-string))
@@ -39,8 +39,7 @@
 
     ;(display (format "~s~n" headers))
     (display (format "~a~n" (list-ref headers 0)))
-    
-    ; TODO: Split request location by "/" and check if == '() or == directory
+
     (define file (get-file-location headers))
     (display (format "~a~n~n" file))
     
