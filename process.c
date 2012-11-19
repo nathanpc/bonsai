@@ -5,10 +5,11 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "misc.h"
 
 char output[1025];
 
-void parse_request_headers(char *headers[], FILE *request) {
+void parse_request_headers(char headers[25][1024], FILE *request) {
     int index = 0;
     
     while (index < 25) {
@@ -19,7 +20,9 @@ void parse_request_headers(char *headers[], FILE *request) {
             break;
         }
         
-        sprintf(headers[index], "%s", line);
+        remove_newline(line);
+        strcpy(headers[index], line);
+        
         index++;
     }
 }
@@ -35,12 +38,13 @@ void send_headers(int connection, char *headers[], int count) {
 }
 
 void process_request(int connection, FILE *request) {
-    char *request_headers[24];
+    char request_headers[25][1024] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
     parse_request_headers(request_headers, request);
     
     for (int i = 0; i < sizeof(request_headers) / sizeof(*request_headers); i++) {
-        // Why the hell is this seg faulting?!
-        printf("%s\n", request_headers[i]);
+        if (strcmp(request_headers[i], "") != 0) {
+            printf("%s\n", request_headers[i]);
+        }
     }
     
     memset(output, 0, sizeof(output));

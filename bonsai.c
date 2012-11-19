@@ -29,6 +29,8 @@ int main(int argc, char *argv[]) {
     bind(socket_descriptor, (struct sockaddr*)&address, sizeof(address));
     listen(socket_descriptor, MAX_CONNECTIONS);
     
+    printf("Server listening on port %d\n", PORT);
+    
     while (1) {
         connection = accept(socket_descriptor, (struct sockaddr*)NULL, NULL);
         FILE *request_headers = fdopen(connection, "a+");
