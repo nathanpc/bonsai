@@ -1,10 +1,10 @@
 /**
-    bonsai Server
-    bonsai.c
-    The awesome tiny server.
-
-    @author Nathan Campos
-*/
+ *  bonsai Server
+ *  bonsai.c
+ *  The awesome tiny server.
+ *
+ *  @author Nathan Campos
+ */
 
 
 #include <sys/socket.h>

@@ -1,9 +1,9 @@
 /**
-    process.c
-    Process the request and respond.
-    
-    @author Nathan Campos
-*/
+ *  process.c
+ *  Process the request and respond.
+ *  
+ *  @author Nathan Campos
+ */
 
 
 #include <stdio.h>
@@ -15,6 +15,12 @@
 
 char output[1025];
 
+/**
+ *  Parse the request headers and populate a string array with them.
+ *
+ *  @param headers Array to be populated with the headers.
+ *  @param request Request file description.
+ */
 void parse_request_headers(char headers[25][1024], FILE *request) {
     int index = 0;
     
@@ -33,6 +39,13 @@ void parse_request_headers(char headers[25][1024], FILE *request) {
     }
 }
 
+/**
+ *  Send the response headers back to the requester.
+ *
+ *  @param connection Connection descriptor.
+ *  @param headers Array of headers to be sent.
+ *  @param count Number of readers to be sent back.
+ */
 void send_headers(int connection, char *headers[], int count) {
     for (int i = 0; i < count; i++) {
         snprintf(output, sizeof(output), "%s%s", headers[i], "\r\n");
@@ -43,6 +56,12 @@ void send_headers(int connection, char *headers[], int count) {
     write(connection, output, strlen(output));
 }
 
+/**
+ *  Print the request headers (for debugging)
+ *
+ *  @see parse_request_headers()
+ *  @param headers Header array obtained from parse_request_headers()
+ */
 void print_request_headers(char headers[25][1024]) {
     for (int i = 0; i < sizeof(headers) / sizeof(*headers); i++) {
         if (strcmp(headers[i], "") != 0) {
@@ -51,6 +70,12 @@ void print_request_headers(char headers[25][1024]) {
     }
 }
 
+/**
+ *  What actually process the request.
+ *
+ *  @param connection Connection descriptor.
+ *  @param request Request file description.
+ */
 void process_request(int connection, FILE *request) {
     char request_headers[25][1024] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
     parse_request_headers(request_headers, request);
