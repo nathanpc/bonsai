@@ -19,7 +19,7 @@ void parse_request_headers(char *headers[], FILE *request) {
             break;
         }
         
-        headers[index] = line;
+        sprintf(headers[index], "%s", line);
         index++;
     }
 }
@@ -39,7 +39,7 @@ void process_request(int connection, FILE *request) {
     parse_request_headers(request_headers, request);
     
     for (int i = 0; i < sizeof(request_headers) / sizeof(*request_headers); i++) {
-        // Why the hell is this not working?!
+        // Why the hell is this seg faulting?!
         printf("%s\n", request_headers[i]);
     }
     
