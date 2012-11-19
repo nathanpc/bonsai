@@ -1,4 +1,10 @@
-// process.c
+/**
+    process.c
+    Process the request and respond.
+    
+    @author Nathan Campos
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,15 +43,17 @@ void send_headers(int connection, char *headers[], int count) {
     write(connection, output, strlen(output));
 }
 
+void print_request_headers(char headers[25][1024]) {
+    for (int i = 0; i < sizeof(headers) / sizeof(*headers); i++) {
+        if (strcmp(headers[i], "") != 0) {
+            printf("%s\n", headers[i]);
+        }
+    }
+}
+
 void process_request(int connection, FILE *request) {
     char request_headers[25][1024] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
     parse_request_headers(request_headers, request);
-    
-    for (int i = 0; i < sizeof(request_headers) / sizeof(*request_headers); i++) {
-        if (strcmp(request_headers[i], "") != 0) {
-            printf("%s\n", request_headers[i]);
-        }
-    }
     
     memset(output, 0, sizeof(output));
     

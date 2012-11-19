@@ -1,4 +1,10 @@
-// misc.c
+/**
+    misc.c
+    Miscellaneous stuff.
+
+    @author Nathan Campos
+*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
