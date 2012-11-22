@@ -13,6 +13,8 @@
 #include <limits.h>
 
 #include "misc.h"
+#include "mime.h"
+
 #define MAX_HEADERS 25
 #define HEADER_SIZE 1025
 
@@ -55,21 +57,48 @@ void request_type_and_file(char request_type[8], char *requested_file, char *fir
     strcpy(requested_file, strtok(NULL, " "));
 }
 
+/**
+ *  Send the response headers back to the requester.
+ *
+ *  @param connection Connection descriptor.
+ *  @param headers Array of headers to be sent.
+ *  @param count Number of readers to be sent back.
+ */
+void send_headers(int connection, char headers[3][HEADER_SIZE], int count) {
+    for (int i = 0; i < count; i++) {
+        snprintf(output, sizeof(output), "%s%s", headers[i], "\r\n");
+        write(connection, output, strlen(output));
+    }
+
+    snprintf(output, sizeof(output), "\r\n");
+    write(connection, output, strlen(output));
+}
+
+/**
+ *  Parse the requested file location and send back the file contents.
+ *
+ *  @see request_type_and_file()
+ *  @param connection Connection descriptor.
+ *  @param file_name Requested file name acquired from request_type_and_file()
+ */
 void send_file(int connection, char file_name[501]) {
     char file_location[1025];
     char absolute_location[PATH_MAX + 1];
     FILE *file;
     long file_size;
     char *read_buffer;
+    char response_headers[3][HEADER_SIZE];
+    char mime[60];
 
     strcat(file_location, "./htdocs");
     strcat(file_location, file_name);
 
-    if (file_name[strlen(file_name) - 1] == '/') {    
+    if (file_name[strlen(file_name) - 1] == '/') {
         strcat(file_location, "index.html");
     }
 
     // TODO: Prevent the use of .. in the URL. Security
+    get_mime(mime, file_location);
     realpath(file_location, absolute_location);
     file = fopen(absolute_location, "r");
     
@@ -81,31 +110,22 @@ void send_file(int connection, char file_name[501]) {
         read_buffer = (char*)malloc(sizeof(char) * file_size);
         fread(read_buffer, 1, file_size, file);
 
-        snprintf(output, sizeof(output), "%s", read_buffer);
-        write(connection, output, strlen(output));
+        strcpy(response_headers[0], "HTTP/1.0 200 OK");
 
         fclose(file);
         free(read_buffer);
     } else {
         // TODO: Send a 404 Header. And get the 404 page from the template dir.
+        strcpy(response_headers[0], "HTTP/1.0 404 Not Found");
     }
 
-     snprintf(output, sizeof(output), "\r\n");
-     write(connection, output, strlen(output));
-}
+    strcpy(response_headers[1], "Server: bamboo v0.0.0a");
+    strcpy(response_headers[2], "Content-Type: ");
+    strcat(response_headers[2], mime);
+    send_headers(connection, response_headers, sizeof(response_headers) / sizeof(*response_headers));
 
-/**
- *  Send the response headers back to the requester.
- *
- *  @param connection Connection descriptor.
- *  @param headers Array of headers to be sent.
- *  @param count Number of readers to be sent back.
- */
-void send_headers(int connection, char *headers[], int count) {
-    for (int i = 0; i < count; i++) {
-        snprintf(output, sizeof(output), "%s%s", headers[i], "\r\n");
-        write(connection, output, strlen(output));
-    }
+    snprintf(output, sizeof(output), "%s", read_buffer);
+    write(connection, output, strlen(output));
 
     snprintf(output, sizeof(output), "\r\n");
     write(connection, output, strlen(output));
@@ -141,15 +161,8 @@ void process_request(int connection, FILE *request) {
     printf("%s %s\n", request_type, file_requested);
     
     memset(output, 0, sizeof(output));
-    char *response_headers[] = { "HTTP/1.0 200 OK",
-                                 "Server: bamboo v0.0.0a",
-                                 "Content-Type: text/html" };
-    send_headers(connection, response_headers, sizeof(response_headers) / sizeof(*response_headers));
 
     if (strcmp(request_type, "GET") == 0) {
         send_file(connection, file_requested);
     }
-    
-    //snprintf(output, sizeof(output), "<h1>It works!</h1>\r\n");
-    //write(connection, output, strlen(output));
 }
