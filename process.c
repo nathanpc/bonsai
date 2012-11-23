@@ -18,7 +18,7 @@
 #define MAX_HEADERS 25
 #define HEADER_SIZE 1025
 
-char output[1025];
+char output[16385];
 
 /**
  *  Parse the request headers and populate a string array with them.
