@@ -113,8 +113,8 @@ void send_file(int connection, char file_name[501]) {
         strcpy(response_headers[0], "HTTP/1.0 200 OK");
 
         fclose(file);
-        free(read_buffer);
     } else {
+        read_buffer = NULL;
         // TODO: Send a 404 Header. And get the 404 page from the template dir.
         strcpy(response_headers[0], "HTTP/1.0 404 Not Found");
     }
@@ -124,8 +124,11 @@ void send_file(int connection, char file_name[501]) {
     strcat(response_headers[2], mime);
     send_headers(connection, response_headers, sizeof(response_headers) / sizeof(*response_headers));
 
-    snprintf(output, sizeof(output), "%s", read_buffer);
-    write(connection, output, strlen(output));
+    if (read_buffer) {
+        snprintf(output, sizeof(output), "%s", read_buffer);
+        write(connection, output, strlen(output));
+        free(read_buffer);
+    }
 
     snprintf(output, sizeof(output), "\r\n");
     write(connection, output, strlen(output));
