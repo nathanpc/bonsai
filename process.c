@@ -138,11 +138,13 @@ void send_file(int connection, char file_name[501]) {
  *  @param headers Header array obtained from parse_request_headers()
  */
 void print_request_headers(char headers[MAX_HEADERS][HEADER_SIZE]) {
-    for (int i = 0; i < sizeof(headers) / sizeof(*headers); i++) {
+    for (int i = 0; i < MAX_HEADERS; i++) {
         if (strcmp(headers[i], "") != 0) {
             printf("%s\n", headers[i]);
         }
     }
+
+    printf("\n");
 }
 
 /**
@@ -159,6 +161,7 @@ void process_request(int connection, FILE *request) {
     char file_requested[501];
     request_type_and_file(request_type, file_requested, request_headers[0]);
     printf("%s %s\n", request_type, file_requested);
+    print_request_headers(request_headers);
     
     memset(output, 0, sizeof(output));
 
