@@ -1,23 +1,14 @@
 CC=gcc
-CFLAGS=-c -Wall -std=gnu99
+CFLAGS=-c -Wall -std=gnu99 -g3
 OBJ=bonsai.o process.o misc.o mime.o
 
 all: bonsai
 
 bonsai: $(OBJ)
-	$(CC) $(OBJ) -o bonsai
+	$(CC) $^ -o $@
 
-bonsai.o: bonsai.c
-	$(CC) $(CFLAGS) bonsai.c
-
-process.o: process.c
-	$(CC) $(CFLAGS) process.c
-
-misc.o: misc.c
-	$(CC) $(CFLAGS) misc.c
-
-mime.o: mime.c
-	$(CC) $(CFLAGS) mime.c
+%.o: %.c
+	$(CC) $(CFLAGS) $<
 
 clean:
 	rm -rf *.o bonsai
