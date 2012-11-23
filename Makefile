@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -Wall -std=c99
+CFLAGS=-c -Wall -std=gnu99
 OBJ=bonsai.o process.o misc.o mime.o
 
 all: bonsai
