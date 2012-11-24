@@ -90,7 +90,7 @@ void send_file(int connection, char file_name[501]) {
     char response_headers[3][HEADER_SIZE];
     char mime[60];
 
-    strcat(file_location, "htdocs");
+    strcpy(file_location, "htdocs");
     strcat(file_location, file_name);
 
     if (file_name[strlen(file_name) - 1] == '/') {
