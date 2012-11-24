@@ -18,7 +18,7 @@
 #define MAX_HEADERS 25
 #define HEADER_SIZE 1025
 
-char output[16385];
+char output[16385];  // Maximum size of the output.
 
 /**
  *  Parse the request headers and populate a string array with them.
@@ -90,7 +90,7 @@ void send_file(int connection, char file_name[501]) {
     char response_headers[3][HEADER_SIZE];
     char mime[60];
 
-    strcat(file_location, "./htdocs");
+    strcat(file_location, "htdocs");
     strcat(file_location, file_name);
 
     if (file_name[strlen(file_name) - 1] == '/') {
@@ -157,6 +157,8 @@ void print_request_headers(char headers[MAX_HEADERS][HEADER_SIZE]) {
  *  @param request Request file description.
  */
 void process_request(int connection, FILE *request) {
+    memset(output, 0, sizeof(output));
+
     char request_headers[MAX_HEADERS][HEADER_SIZE] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
     parse_request_headers(request_headers, request);
 
@@ -165,8 +167,6 @@ void process_request(int connection, FILE *request) {
     request_type_and_file(request_type, file_requested, request_headers[0]);
     printf("%s %s\n", request_type, file_requested);
     print_request_headers(request_headers);
-    
-    memset(output, 0, sizeof(output));
 
     if (strcmp(request_type, "GET") == 0) {
         send_file(connection, file_requested);
