@@ -107,7 +107,7 @@ void send_file(int connection, char file_name[501]) {
         file_size = ftell(file);
         rewind(file);
 
-        read_buffer = (char*)malloc(sizeof(char) * file_size);
+        read_buffer = malloc(sizeof * read_buffer * file_size);
         fread(read_buffer, 1, file_size, file);
 
         strcpy(response_headers[0], "HTTP/1.0 200 OK");
