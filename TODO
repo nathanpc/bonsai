@@ -1,0 +1,6 @@
+The TODO list for the awesome bonsai server:
+
+  - Improve the folder checking algorithm.
+  - Implement the Lua scripting for the config files (yes, all config files are going to be written in Lua)
+  - Write the standards for the config files.
+  - Implement the Virtual Host stuff in Lua.
