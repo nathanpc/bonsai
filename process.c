@@ -16,6 +16,7 @@
 
 #include "misc.h"
 #include "mime.h"
+#include "termcolor.h"
 
 #define MAX_HEADERS 25
 #define HEADER_SIZE 1025
@@ -188,7 +189,10 @@ void process_request(int connection, FILE *request) {
 
     parse_request_headers(request_headers, request);
     request_type_and_file(request_type, file_requested, request_headers[0]);
+
+    termcolor(BOLD, WHITE);
     printf("%s %s\n", request_type, file_requested);
+    reset_termcolor();
     print_request_headers(request_headers);
 
     if (strcmp(request_type, "GET") == 0) {

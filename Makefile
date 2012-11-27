@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-c -Wall -std=gnu99 -g3
-OBJ=bonsai.o process.o misc.o mime.o
+OBJ=bonsai.o process.o misc.o mime.o termcolor.o
 
 all: bonsai
 

@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 #include "process.h"
+#include "termcolor.h"
 
 
 int PORT = 8080;
@@ -42,9 +43,14 @@ int main(int argc, char *argv[]) {
 
     // TODO: Handle the ECONNREFUSED error <http://www.gnu.org/software/libc/manual/html_node/Accepting-Connections.html>
     if (binded == 0) {
-        printf("Server listening on port %d\n", PORT);
+        termcolor(BOLD, CYAN);
+        printf("Server listening on port %d\n\n", PORT);
+        reset_termcolor();
     } else {
+        termcolor(BOLD, RED);
         perror("ERROR");
+        reset_termcolor();
+
         return 1;
     }
     
