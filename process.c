@@ -94,6 +94,7 @@ void send_file(int connection, char file_name[501]) {
     char mime[60];
     DIR *dir;
     bool redir = false;
+    bool invalid_url = false;
 
     strcpy(file_location, "htdocs");
     strcat(file_location, file_name);
@@ -121,10 +122,12 @@ void send_file(int connection, char file_name[501]) {
     if (redir) {
         read_buffer = NULL;
 
-        strcpy(response_headers[0], "HTTP/1.0 301 Moved Permanently");
+        strcpy(response_headers[0], "HTTP/1.1 301 Moved Permanently");
         strcpy(response_headers[2], "Location: ");
         strcat(response_headers[2], file_name);
         strcat(response_headers[2], "/");
+    } else if (invalid_url) {
+        read_buffer = NULL;
     } else if (file != NULL) {
         fseek(file, 0, SEEK_END);
         file_size = ftell(file);
@@ -133,7 +136,7 @@ void send_file(int connection, char file_name[501]) {
         read_buffer = calloc((sizeof * read_buffer * file_size) + 1, sizeof(char));
         fread(read_buffer, 1, file_size, file);
 
-        strcpy(response_headers[0], "HTTP/1.0 200 OK");
+        strcpy(response_headers[0], "HTTP/1.1 200 OK");
         strcpy(response_headers[2], "Content-Type: ");
         strcat(response_headers[2], mime);
 
@@ -141,7 +144,7 @@ void send_file(int connection, char file_name[501]) {
     } else {
         read_buffer = NULL;
         // TODO: Get the 404 page from the template dir.
-        strcpy(response_headers[0], "HTTP/1.0 404 Not Found");
+        strcpy(response_headers[0], "HTTP/1.1 404 Not Found");
         strcpy(response_headers[2], "Content-Type: text/html");
     }
 
