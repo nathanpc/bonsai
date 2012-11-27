@@ -61,6 +61,22 @@ void request_type_and_file(char request_type[8], char *requested_file, char *fir
 }
 
 /**
+ *  Check if the requested URL is invalid.
+ *
+ *  @see request_type_and_file()
+ *  @param file_name Requested file name acquired from request_type_and_file()
+ */
+bool is_invalid_url(char file_name[501]) {
+    if (strstr(file_name, "/..") != NULL) {
+        return true;
+    } else if (strstr(file_name, "/./") != NULL) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
  *  Send the response headers back to the requester.
  *
  *  @param connection Connection descriptor.
@@ -94,7 +110,7 @@ void send_file(int connection, char file_name[501]) {
     char mime[60];
     DIR *dir;
     bool redir = false;
-    bool invalid_url = false;
+    bool invalid_url = is_invalid_url(file_name);
 
     strcpy(file_location, "htdocs");
     strcat(file_location, file_name);
@@ -102,20 +118,20 @@ void send_file(int connection, char file_name[501]) {
     if (file_name[strlen(file_name) - 1] == '/') {
         strcat(file_location, "index.html");
     } else {
-        char tmp_absolute_location[PATH_MAX + 1];
+        if (!invalid_url) {
+            char tmp_absolute_location[PATH_MAX + 1];
 
-        realpath(file_location, tmp_absolute_location);
-        strcat(tmp_absolute_location, "/");
-        dir = opendir(tmp_absolute_location);
+            realpath(file_location, tmp_absolute_location);
+            strcat(tmp_absolute_location, "/");
+            dir = opendir(tmp_absolute_location);
 
-        if (dir != NULL) {
-            strcat(file_location, "/index.html");
-            redir = true;
+            if (dir != NULL) {
+                strcat(file_location, "/index.html");
+                redir = true;
+            }
         }
     }
 
-    // TODO: Prevent the use of .. in the URL. Security
-    get_mime(mime, file_location);
     realpath(file_location, absolute_location);
     file = fopen(absolute_location, "r");
     
@@ -128,7 +144,14 @@ void send_file(int connection, char file_name[501]) {
         strcat(response_headers[2], "/");
     } else if (invalid_url) {
         read_buffer = NULL;
+
+        strcpy(response_headers[0], "HTTP/1.1 403 Forbidden");
+        strcpy(response_headers[2], "Content-Type: text/html");
+
+        // TODO: Get the template from dir.
     } else if (file != NULL) {
+        get_mime(mime, file_location);
+
         fseek(file, 0, SEEK_END);
         file_size = ftell(file);
         rewind(file);
