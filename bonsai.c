@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
     
     printf("Server listening on port %d\n", PORT);
     
-    while (1) {
+    while (true) {
         connection = accept(socket_descriptor, (struct sockaddr*)NULL, NULL);
         FILE *request_headers = fdopen(connection, "a+");
 

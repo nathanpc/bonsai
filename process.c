@@ -8,9 +8,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#include <dirent.h>
 
 #include "misc.h"
 #include "mime.h"
@@ -89,12 +91,25 @@ void send_file(int connection, char file_name[501]) {
     char *read_buffer;
     char response_headers[3][HEADER_SIZE];
     char mime[60];
+    DIR *dir;
+    bool redir = false;
 
     strcpy(file_location, "htdocs");
     strcat(file_location, file_name);
 
     if (file_name[strlen(file_name) - 1] == '/') {
         strcat(file_location, "index.html");
+    } else {
+        char tmp_absolute_location[PATH_MAX + 1];
+
+        realpath(file_location, tmp_absolute_location);
+        strcat(tmp_absolute_location, "/");
+        dir = opendir(tmp_absolute_location);
+
+        if (dir != NULL) {
+            strcat(file_location, "/index.html");
+            redir = true;
+        }
     }
 
     // TODO: Prevent the use of .. in the URL. Security
@@ -102,26 +117,34 @@ void send_file(int connection, char file_name[501]) {
     realpath(file_location, absolute_location);
     file = fopen(absolute_location, "r");
     
-    if (file != NULL) {
+    if (redir) {
+        read_buffer = NULL;
+
+        strcpy(response_headers[0], "HTTP/1.0 301 Moved Permanently");
+        strcpy(response_headers[2], "Location: ");
+        strcat(response_headers[2], file_name);
+        strcat(response_headers[2], "/");
+    } else if (file != NULL) {
         fseek(file, 0, SEEK_END);
         file_size = ftell(file);
         rewind(file);
 
-        read_buffer = malloc(sizeof * read_buffer * file_size);
+        read_buffer = calloc((sizeof * read_buffer * file_size) + 1, sizeof(char));
         fread(read_buffer, 1, file_size, file);
 
         strcpy(response_headers[0], "HTTP/1.0 200 OK");
+        strcpy(response_headers[2], "Content-Type: ");
+        strcat(response_headers[2], mime);
 
         fclose(file);
     } else {
         read_buffer = NULL;
-        // TODO: Send a 404 Header. And get the 404 page from the template dir.
+        // TODO: Get the 404 page from the template dir.
         strcpy(response_headers[0], "HTTP/1.0 404 Not Found");
+        strcpy(response_headers[2], "Content-Type: text/html");
     }
 
     strcpy(response_headers[1], "Server: bamboo v0.0.0a");
-    strcpy(response_headers[2], "Content-Type: ");
-    strcat(response_headers[2], mime);
     send_headers(connection, response_headers, sizeof(response_headers) / sizeof(*response_headers));
 
     if (read_buffer) {
