@@ -180,13 +180,13 @@ void print_request_headers(char headers[MAX_HEADERS][HEADER_SIZE]) {
  *  @param request Request file description.
  */
 void process_request(int connection, FILE *request) {
-    memset(output, 0, sizeof(output));
-
-    char request_headers[MAX_HEADERS][HEADER_SIZE] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
-    parse_request_headers(request_headers, request);
-
     char request_type[8];
     char file_requested[501];
+    char request_headers[MAX_HEADERS][HEADER_SIZE] = { "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" };
+
+    memset(output, 0, sizeof(output));
+
+    parse_request_headers(request_headers, request);
     request_type_and_file(request_type, file_requested, request_headers[0]);
     printf("%s %s\n", request_type, file_requested);
     print_request_headers(request_headers);

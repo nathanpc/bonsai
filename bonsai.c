@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
     int socket_descriptor = 0;
     int connection = 0;
     struct sockaddr_in address;
+    int binded;
     
     socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
     
@@ -36,10 +37,16 @@ int main(int argc, char *argv[]) {
     address.sin_addr.s_addr = htonl(INADDR_ANY);
     address.sin_port = htons(PORT);
     
-    bind(socket_descriptor, (struct sockaddr*)&address, sizeof(address));
+    binded = bind(socket_descriptor, (struct sockaddr*)&address, sizeof(address));
     listen(socket_descriptor, MAX_CONNECTIONS);
-    
-    printf("Server listening on port %d\n", PORT);
+
+    // TODO: Handle the ECONNREFUSED error <http://www.gnu.org/software/libc/manual/html_node/Accepting-Connections.html>
+    if (binded == 0) {
+        printf("Server listening on port %d\n", PORT);
+    } else {
+        perror("ERROR");
+        return 1;
+    }
     
     while (true) {
         connection = accept(socket_descriptor, (struct sockaddr*)NULL, NULL);
