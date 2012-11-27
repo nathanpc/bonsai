@@ -1,6 +1,5 @@
 The TODO list for the awesome bonsai server:
 
-  - Prevent the use of .. in the URL for security.
   - List the files in a directory if the requested doesn't contain a index file. (like Apache)
   - Implement the Lua scripting for the config files (yes, all config files are going to be written in Lua).
   - Write the standards for the config files.
@@ -9,3 +8,5 @@ The TODO list for the awesome bonsai server:
 
   x Improve the folder checking algorithm.
   x Colorize the console output.
+  x Prevent the use of .. in the URL for security.
+  x Implement the template dir stuff.

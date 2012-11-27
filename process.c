@@ -77,6 +77,23 @@ bool is_invalid_url(char file_name[501]) {
 }
 
 /**
+ *  Read the file to be sent to the client.
+ *
+ *  @param read_buffer Where the file contents are going to be stored.
+ *  @param file File to be read
+ */
+void read_response_file(char *read_buffer, FILE *file) {
+    long file_size;
+
+    fseek(file, 0, SEEK_END);
+    file_size = ftell(file);
+    rewind(file);
+
+    strcpy(read_buffer, calloc((sizeof * read_buffer * file_size) + 1, sizeof(char)));
+    fread(read_buffer, 1, file_size, file);
+}
+
+/**
  *  Send the response headers back to the requester.
  *
  *  @param connection Connection descriptor.
@@ -104,7 +121,6 @@ void send_file(int connection, char file_name[501]) {
     char file_location[1025];
     char absolute_location[PATH_MAX + 1];
     FILE *file;
-    long file_size;
     char *read_buffer;
     char response_headers[3][HEADER_SIZE];
     char mime[60];
@@ -143,21 +159,16 @@ void send_file(int connection, char file_name[501]) {
         strcat(response_headers[2], file_name);
         strcat(response_headers[2], "/");
     } else if (invalid_url) {
-        read_buffer = NULL;
-
         strcpy(response_headers[0], "HTTP/1.1 403 Forbidden");
         strcpy(response_headers[2], "Content-Type: text/html");
 
-        // TODO: Get the template from dir.
+        realpath("templates/403.html", absolute_location);
+        file = fopen(absolute_location, "r");
+        read_response_file(read_buffer, file);
+        fclose(file);
     } else if (file != NULL) {
         get_mime(mime, file_location);
-
-        fseek(file, 0, SEEK_END);
-        file_size = ftell(file);
-        rewind(file);
-
-        read_buffer = calloc((sizeof * read_buffer * file_size) + 1, sizeof(char));
-        fread(read_buffer, 1, file_size, file);
+        read_response_file(read_buffer, file);
 
         strcpy(response_headers[0], "HTTP/1.1 200 OK");
         strcpy(response_headers[2], "Content-Type: ");
@@ -165,10 +176,13 @@ void send_file(int connection, char file_name[501]) {
 
         fclose(file);
     } else {
-        read_buffer = NULL;
-        // TODO: Get the 404 page from the template dir.
         strcpy(response_headers[0], "HTTP/1.1 404 Not Found");
         strcpy(response_headers[2], "Content-Type: text/html");
+
+        realpath("templates/403.html", absolute_location);
+        file = fopen(absolute_location, "r");
+        read_response_file(read_buffer, file);
+        fclose(file);
     }
 
     strcpy(response_headers[1], "Server: bamboo v0.0.0a");
@@ -177,7 +191,7 @@ void send_file(int connection, char file_name[501]) {
     if (read_buffer) {
         snprintf(output, sizeof(output), "%s", read_buffer);
         write(connection, output, strlen(output));
-        free(read_buffer);
+        //free(read_buffer);
     }
 
     snprintf(output, sizeof(output), "\r\n");
